@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext,useEffect,useState } from "react";
 import { Alert } from "react-native";
+import { ApiClient } from "../../api";
 
 export const AuthContext = createContext();
 
@@ -12,6 +13,19 @@ const[isLoading,setIsLoading]=useState(false);
 const[splashLoading,setSplashLoading] = useState(false);
 
     const register = async (name, email, password) => {
+
+var apiClient= new ApiClient();
+
+apiClient.get('/example-endpoint', null)
+  .then(response => {
+    // Handle the successful response
+    console.log('API Response:', response.data);
+  })
+  .catch(error => {
+    // Handle errors, including token-related errors
+    console.error('API Error:', error);
+  });
+
         setIsLoading(true);
         try {
             const response = await axios.post('https://fermantest.free.beeceptor.com/register', {
