@@ -1,11 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const RegisterScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { register } = useContext(AuthContext);
+    const { isLoading,register } = useContext(AuthContext);
+
 
     const handleRegister = () => {
         if (!email || !password) {
@@ -18,6 +20,7 @@ const RegisterScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
+            <Spinner visible={isLoading} animation='fade'></Spinner>
             <View style={styles.wrapper}>
                 <Text style={styles.title}>Kayıt Ol</Text>
                 <TextInput 
