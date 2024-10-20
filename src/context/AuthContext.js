@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext,useEffect,useState } from "react";
 import { Alert } from "react-native";
-import { ApiClient } from "../../api";
+import api from "../../api";
 
 export const AuthContext = createContext();
 
@@ -14,17 +14,17 @@ const[splashLoading,setSplashLoading] = useState(false);
 
     const register = async (name, email, password) => {
 
-var apiClient= new ApiClient();
+//var apiClient= new ApiClient();
 
-apiClient.get('/example-endpoint', null)
-  .then(response => {
-    // Handle the successful response
-    console.log('API Response:', response.data);
-  })
-  .catch(error => {
-    // Handle errors, including token-related errors
-    console.error('API Error:', error);
-  });
+// apiClient.get('/example-endpoint', null)
+//   .then(response => {
+//     // Handle the successful response
+//     console.log('API Response:', response.data);
+//   })
+//   .catch(error => {
+//     // Handle errors, including token-related errors
+//     console.error('API Error:', error);
+//   });
 
         setIsLoading(true);
         try {
@@ -56,16 +56,19 @@ apiClient.get('/example-endpoint', null)
     const login = async(email,password)=>{
         try{
             setIsLoading(true);
-            const response = await axios.post('https://fermantest.free.beeceptor.com/login', {
-                email,
-                password,
+            const response = await api.post('auth/login', {
+                "username":email,
+                "password":password,
             });
+
             const userInfo = response.data;
     
             // Kullanıcı kaydı başarılı ise
             if (userInfo) {
                 setUserInfo(userInfo);
-                AsyncStorage.setItem('userInfo',JSON.stringify(userInfo));
+                await AsyncStorage.setItem('access_token', userInfo.Token);
+                await AsyncStorage.setItem('refresh_token', userInfo.RefreshToken);
+                await AsyncStorage.setItem('userInfo',JSON.stringify(userInfo));
                 Alert.alert('Giriş Başarılı', `${JSON.stringify(userInfo)}`);
             } else {
                 Alert.alert('Giriş Başarısız', 'Giriş sırasında beklenmedik bir hata oluştu.');
@@ -73,28 +76,31 @@ apiClient.get('/example-endpoint', null)
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
-            const errorMessage = error.response ? error.response.data.message : error.message;
-            console.error("Registration error:", errorMessage);
-            Alert.alert('Kayıt Hatası', errorMessage || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+            if (error.response) {
+                console.log('API Error Response:', error.response);
+                Alert.alert('Hata', `API Yanıt Hatası: ${error.response.data.message}`);
+            } else if (error.request) {
+                console.log('API Error Request:', error.request);
+                Alert.alert('Hata', 'API ile bağlantı kurulamadı.');
+            } else {
+                console.log('General Error:', error.message);
+                Alert.alert('Hata', `Genel Hata: ${error.message}`);
+            }
         }
        
     }
 
-    const logout = async()=>{
-        setIsLoading(true);
-        const response = await axios.post('https://fermantest.free.beeceptor.com/logout', {},{
-            headers:{
-                Authorization:`Bearer ${userInfo.access_token}`,
-            }
-        }).then(res=>{
-            Alert.alert('Çıkış Başarılı', `${JSON.stringify(userInfo)}`);
-            AsyncStorage.removeItem('userInfo');
-            setUserInfo({});
-            setIsLoading(false);
-        }).catch(errorMessage=>{
-            console.error("Logout error:", errorMessage);
-        });    
-    }
+    const logout = async () => {
+        try {
+            const response =await api.post('/auth/logout'); // API üzerinde logout çağırma
+          //await api.clearTokens(); // Localdeki token'ları temizleme
+          AsyncStorage.removeItem('userInfo');
+          setUserInfo({});
+          console.log(response.data);
+        } catch (error) {
+          console.error('Logout error', error);
+        }
+      };
 
     const isUserLoggedIn= async ()=>{
         try {

@@ -18,7 +18,7 @@ const Navigation = () => {
         <Stack.Navigator>
           {splashLoading ? 
           (<Stack.Screen name="Splash Screen" component={SplashScreen} options={{headerShown:false}}/> ):
-          userInfo.access_token ? (
+          userInfo.Token ? (
             <Stack.Screen name="Home" component={HomeScreen}/>
           ):(
             <>

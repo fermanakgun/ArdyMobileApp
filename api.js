@@ -1,120 +1,106 @@
-// Import necessary packages
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Define your API and identity URLs
-const API_URL = "https://fermantest.free.beeceptor.com";
-const REFRESH_TOKEN_URL = "https://fermantest.free.beeceptor.com/refresh-token";
-const clientId = "fermanclientid";
-const scope = "fermanscope";
+// API base URL (API'nizin URL'sini girin)
+const API_URL = 'https://pratikyonetim.com/api';
 
-export const ApiClient = () => {
-    // Create a new axios instance
-    const api = axios.create({
-        baseURL: API_URL,
-        headers: {
-            "Content-Type": "application/json",
-        },
+// Axios instance oluşturma
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Access ve refresh token'ları AsyncStorage'dan alıyoruz
+const getAccessToken = async () => {
+  return await AsyncStorage.getItem('access_token');
+};
+
+const getRefreshToken = async () => {
+  return await AsyncStorage.getItem('refresh_token');
+};
+
+// Access token'ı AsyncStorage'a kaydetme
+const setAccessToken = async (token) => {
+  await AsyncStorage.setItem('access_token', token);
+};
+
+// Refresh token'ı AsyncStorage'a kaydetme
+const setRefreshToken = async (token) => {
+  await AsyncStorage.setItem('refresh_token', token);
+};
+
+// Access token ve refresh token'ları temizlemek için logout işlemi
+const clearTokens = async () => {
+  await AsyncStorage.removeItem('access_token');
+  await AsyncStorage.removeItem('refresh_token');
+};
+
+// Access token süresi dolduğunda refresh token ile yeni bir token alıyoruz
+const refreshToken = async () => {
+  try {
+    const refresh_token = await getRefreshToken();
+    const response = await axios.post(`${API_URL}/auth/refresh-token`, {
+      refreshToken: refresh_token,
     });
-    
-    // Add a request interceptor to add the JWT token to the authorization header
-    api.interceptors.request.use(
-       async (config) => {
-         const token =await AsyncStorage.getItem("token");
-         if (token) {
-           config.headers.Authorization = `${token}`;
-          }
-          return config;
-        },
-        (error) => Promise.reject(error)
-    );
-  
-    createAxiosResponseInterceptor();
 
-    function createAxiosResponseInterceptor() {
-      const interceptor = api.interceptors.response.use(
-          (response) => {
-            console.log("RETURN REPONSE INSTEAD ERRRO")
-            return response
-          },
-          async (error) => {
-            console.log(error.response.status)
-              // Reject promise if usual error
-              if (error.response.status !== 401) {
-                  return Promise.reject(error);
-              }
-              if (
-                error.response.status === 401 &&
-                AsyncStorage.getItem("refreshToken")
-                ) {
-                  try {
-                    api.interceptors.response.eject(interceptor);
-                    
-                    const refreshToken = await AsyncStorage.getItem("refreshToken");
-                    console.error("Error at API AXIOS", error.response.status, refreshToken)
-                    
-                    const url = `${REFRESH_TOKEN_URL}`;
-  
-                    const body = `grant_type=refresh_token&client_id=${clientId}&scope=${scope}&refresh_token=${refreshToken}`;
-                    const headers = {
-                      'Content-Type': 'application/x-www-form-urlencoded',
-                    };
-                    
-                    const response = await axios.post(url, body, { headers: headers })
-                    
-                    console.log(`access_token : ${response.data.access_token}`);
-                    console.log(`refresh_token : ${response.data.refresh_token}`);
+    const { Token: newAccessToken, RefreshToken: newRefreshToken } = response.data;
 
-                    await AsyncStorage.setItem("token", "Bearer " + response.data.access_token);
-                    await AsyncStorage.setItem("refreshToken", response.data.refresh_token);
-                    console.log("Successfully refresh token")
+    // Yeni access ve refresh token'ları kaydet
+    await setAccessToken(newAccessToken);
+    await setRefreshToken(newRefreshToken);
 
-                    error.response.config.headers["Authorization"] =
-                          "Bearer " + response.data.access_token;
-                    return axios(error.response.config);
-                  }
-                  catch(err) {
-                    console.error("Error at refresh token", err.response.status);
-                    
-                    //If refresh token is invalid, you will receive this error status and log user out
-                    if (err.response.status === 400) {
-                      throw { response: { status: 401 } };
-                    }
-                    return Promise.reject(err);
-                  }
-                  finally{createAxiosResponseInterceptor}; 
-            }
-          }
-      );
+    return newAccessToken;
+  } catch (error) {
+    console.error('Error refreshing token', error);
+    throw error; // Token yenilenmezse hata fırlatıyoruz
+  }
+};
+
+// Axios interceptor ile istekten önce access token ekleme
+api.interceptors.request.use(
+  async (config) => {
+    const accessToken = await getAccessToken();
+    if (accessToken) {
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Axios interceptor ile hatalı yanıt durumunda refresh token kullanarak yeni access token alma
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Eğer access token süresi dolmuşsa ve yanıt 401 ise
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; // Bu isteği tekrar göndermeyi işaretliyoruz
+
+      try {
+        const newAccessToken = await refreshToken();
+        axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
+        return api(originalRequest); // İsteği yeni token ile tekrar gönder
+      } catch (err) {
+        console.error('Error during token refresh:', err);
+
+        // Refresh token süresi dolmuşsa veya başka bir hata varsa token'ları temizliyoruz
+        await clearTokens();
+        return Promise.reject(err);
+      }
     }
 
-    const get = (path, params) => {
-        return api.get(path,{params}).then((response) => response);
-    };
+    return Promise.reject(error); // Diğer hatalar için reddet
+  }
+);
 
-    const post = (path, body, params) => {
-        return api.post(path, body, params).then((response) => response);
-    };
-
-    const put = (path, body, params) => {
-        return api.put(path, body, params).then((response) => response);
-    };
-
-    const patch = (path, body, params) => {
-      return api.patch(path, body, params).then((response) => response);
-  };
-
-    const del = (path) => {
-        return api.delete(path).then((response) => response);
-    };
-
-
-
-    return {
-        get,
-        post,
-        patch,
-        put,
-        del,
-    };
-};
+export default api;
