@@ -9,6 +9,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
 
     const[userInfo,setUserInfo]=useState({});
+    const[customerInfo,setCustomerInfo]=useState({});
 const[isLoading,setIsLoading]=useState(false);
 const[splashLoading,setSplashLoading] = useState(false);
 
@@ -69,7 +70,11 @@ const[splashLoading,setSplashLoading] = useState(false);
                 await AsyncStorage.setItem('access_token', userInfo.Token);
                 await AsyncStorage.setItem('refresh_token', userInfo.RefreshToken);
                 await AsyncStorage.setItem('userInfo',JSON.stringify(userInfo));
-                Alert.alert('Giriş Başarılı', `${JSON.stringify(userInfo)}`);
+
+                const getActiveCustomerInfo = await api.post('customer/getActiveCustomerInfo', {});
+                await AsyncStorage.setItem('customerInfo',JSON.stringify(getActiveCustomerInfo.data.customer));
+                setCustomerInfo(getActiveCustomerInfo.data.customer);
+                Alert.alert('Giriş Başarılı', `${JSON.stringify(getActiveCustomerInfo.data.customer.Username)}`);
             } else {
                 Alert.alert('Giriş Başarısız', 'Giriş sırasında beklenmedik bir hata oluştu.');
             }
@@ -96,7 +101,6 @@ const[splashLoading,setSplashLoading] = useState(false);
           //await api.clearTokens(); // Localdeki token'ları temizleme
           AsyncStorage.removeItem('userInfo');
           setUserInfo({});
-          console.log(response.data);
         } catch (error) {
           console.error('Logout error', error);
         }
@@ -110,6 +114,11 @@ const[splashLoading,setSplashLoading] = useState(false);
             if(userInfo){
                 setUserInfo(userInfo);
             }
+            let customerInfo = await AsyncStorage.getItem('customerInfo');
+            customerInfo=JSON.parse(customerInfo);
+            if(customerInfo){
+                setCustomerInfo(customerInfo);
+            }
             setSplashLoading(false);
         } catch (errorMessage) {
             setSplashLoading(false);
@@ -122,7 +131,7 @@ const[splashLoading,setSplashLoading] = useState(false);
     },[]);
 
     return (
-        <AuthContext.Provider value={{ isLoading,userInfo,splashLoading,register,login,logout }}>
+        <AuthContext.Provider value={{ isLoading,userInfo,customerInfo,splashLoading,register,login,logout }}>
             {children}
         </AuthContext.Provider>
     );

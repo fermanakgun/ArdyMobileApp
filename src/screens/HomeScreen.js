@@ -4,12 +4,12 @@ import Spinner from 'react-native-loading-spinner-overlay';
 import { AuthContext } from '../context/AuthContext';
 
 const HomeScreen = () => {
-  const {userInfo,logout,isLoading} = useContext(AuthContext);
+  const {userInfo,logout,isLoading,customerInfo} = useContext(AuthContext);
   return (
     <View
       style={styles.container}>
             <Spinner visible={isLoading} animation='fade'></Spinner>
-            <Text style={styles.welcome}>Hoşgeldin {userInfo.name}</Text>
+            <Text style={styles.welcome}>Hoşgeldin {customerInfo.FirstName} {customerInfo.LastName}</Text>
             <Button title='Çıkış Yap'  onPress={logout}/>
     </View>
   );
