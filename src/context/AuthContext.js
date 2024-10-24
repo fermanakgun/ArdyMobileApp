@@ -106,25 +106,37 @@ const[splashLoading,setSplashLoading] = useState(false);
         }
       };
 
-    const isUserLoggedIn= async ()=>{
+      const isUserLoggedIn = async () => {
         try {
-            setSplashLoading(true);
+            setSplashLoading(true); // Splash screen loading state
+    
+            // userInfo null dönerse parse etmeye çalışmadan önce kontrol edin
             let userInfo = await AsyncStorage.getItem('userInfo');
-            userInfo=JSON.parse(userInfo);
-            if(userInfo){
+            if (userInfo) {
+                userInfo = JSON.parse(userInfo); // Eğer userInfo varsa parse et
                 setUserInfo(userInfo);
             }
+    
             let customerInfo = await AsyncStorage.getItem('customerInfo');
-            customerInfo=JSON.parse(customerInfo);
-            if(customerInfo){
+            if (customerInfo) {
+                customerInfo = JSON.parse(customerInfo); // Eğer customerInfo varsa parse et
                 setCustomerInfo(customerInfo);
+    
+                // Eğer customerInfo'dan herhangi bir bilgi gösterecekseniz, doğrudan string geçmelisiniz
+                if (customerInfo.Username) {
+                    //Alert.alert('Hoşgeldiniz', `${customerInfo.Username}`); // JSX yerine string kullanın
+                }
             }
-            setSplashLoading(false);
+    
         } catch (errorMessage) {
-            setSplashLoading(false);
             console.error("isUserLoggedIn error:", errorMessage);
+    
+            // Burada doğrudan string kullanın
+            Alert.alert('Hata', 'Kullanıcı durumu kontrol edilirken bir hata oluştu.');
+        } finally {
+            setSplashLoading(false); // Splash loading state false
         }
-    }
+    };
 
     useEffect(()=>{
         isUserLoggedIn();

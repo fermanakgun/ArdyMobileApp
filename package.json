@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "ios simulator": "react-native run-ios --simulator='iPhone 14'",
+    "ios simulator": "react-native run-ios --simulator='iPhone 16 Pro MAX'",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
@@ -12,9 +12,20 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.0.0",
+    "@react-native-community/slider": "^4.5.4",
+    "@react-navigation/bottom-tabs": "^6.6.1",
+    "gl-react": "^5.2.0",
+    "gl-react-native": "^5.2.1",
     "react": "18.3.1",
     "react-native": "0.75.4",
-    "react-native-loading-spinner-overlay": "^3.0.1"
+    "react-native-image-crop-picker": "^0.41.4",
+    "react-native-image-filter-kit": "^0.8.0",
+    "react-native-image-picker": "^7.1.2",
+    "react-native-loading-spinner-overlay": "^3.0.1",
+    "react-native-permissions": "^5.0.1",
+    "react-native-photo-manipulator": "^1.7.3",
+    "react-native-push-notification": "^8.1.1",
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

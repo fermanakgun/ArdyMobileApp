@@ -17,11 +17,19 @@ end
 target 'ArdyMobileApp' do
   config = use_native_modules!
 
+  # Hermes'i devre dışı bırak
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :hermes_enabled => false, # Hermes'i devre dışı bırakıyoruz
   )
+
+  # Eğer react-native-push-notification kullanıyorsanız bu satırı ekleyin
+  pod 'RNCPushNotificationIOS', :path => '../node_modules/@react-native-community/push-notification-ios'
+
+  # Diğer olası kütüphaneler için örnekler (İhtiyacınıza göre kaldırabilirsiniz)
+  # pod 'ReactNativeAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
 
   target 'ArdyMobileAppTests' do
     inherit! :complete
@@ -29,12 +37,15 @@ target 'ArdyMobileApp' do
   end
 
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
-    react_native_post_install(
-      installer,
-      config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
-    )
+    # React Native için gerekli post_install işlemleri
+    react_native_post_install(installer, config[:reactNativePath])
+
+    # Build ayarları düzeltmeleri
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['ENABLE_BITCODE'] = 'NO' # Bitcode devre dışı bırak
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym' # dSYM dosyalarını oluştur
+      end
+    end
   end
 end
