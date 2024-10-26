@@ -5,7 +5,7 @@ import { Alert } from 'react-native';
 // API base URL (API'nizin URL'sini girin)
 let API_URL = 'https://pratikyonetim.com/api';
 
-if (__DEV__) {
+if (__DEV__ && false) {
   API_URL = 'http://localhost:40647/api';
 }
 
@@ -58,7 +58,8 @@ const refreshToken = async () => {
 
     return newAccessToken;
   } catch (error) {
-        Alert.alert("Error refreshing token",JSON.stringify(error));
+    console.log("Error refreshing token:", error); // Console log
+    // Alert.alert("Error refreshing token", JSON.stringify(error));
     throw error; // Token yenilenmezse hata fırlatıyoruz
   }
 };
@@ -96,7 +97,9 @@ api.interceptors.response.use(
 
         return api(originalRequest); // İsteği yeni token ile tekrar gönder
       } catch (err) {
-        Alert.alert("RefreshTokenSonrasında",JSON.stringify(err));
+        console.log("Error after RefreshToken:", err); // Console log
+        // Alert.alert("RefreshTokenSonrasında", JSON.stringify(err));
+        
         // Refresh token süresi dolmuşsa veya başka bir hata varsa token'ları temizliyoruz
         await clearTokens();
         return Promise.reject(err);
