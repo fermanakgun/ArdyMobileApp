@@ -12,28 +12,44 @@ export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [splashLoading, setSplashLoading] = useState(false);
 
-    const register = async (name, email, password) => {
+    const register = async (name,lastName, email, password,navigation) => {
         setIsLoading(true);
         try {
-            const response = await axios.post('https://fermantest.free.beeceptor.com/register', {
-                name,
-                email,
-                password,
+            let response = await api.post('auth/register',{
+                "FirstName":name,
+                "LastName":lastName,
+                "Email":email,
+                "Password":password
             });
+           
 
-            const userInfo = response.data;
-            if (userInfo) {
-                setUserInfo(userInfo);
-                AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
-                Alert.alert('Kayıt Başarılı', `${JSON.stringify(userInfo)}`);
-            } else {
-                Alert.alert('Kayıt Başarısız', 'Kullanıcı kaydı sırasında bir hata oluştu.');
-            }
+            const responseData = response.data;
+            console.log(JSON.stringify(responseData))
             setIsLoading(false);
+            if(responseData.Token!=undefined){
+                //token varsa login yaptıralım.
+                setUserInfo(responseData);
+                await AsyncStorage.multiSet([
+                    ['userInfo', JSON.stringify(responseData)],
+                    ['access_token', responseData.Token],
+                    ['refresh_token', responseData.RefreshToken],
+                ]);
+                
+                const getActiveCustomerInfo = await api.post('customer/getActiveCustomerInfo', {});
+                await AsyncStorage.setItem('customerInfo', JSON.stringify(getActiveCustomerInfo.data.customer));
+                setCustomerInfo(getActiveCustomerInfo.data.customer);
+                Alert.alert('Kayıt Başarılı', `${JSON.stringify(getActiveCustomerInfo.data.customer.Username)}`);
+            }else{
+                Alert.alert('Kayıt Başarılı', responseData.Message || 'Kayıt işlemi başarılı.');
+                navigation.navigate('Login');
+            //Burada login ekranına yönlendirmek istiyorum.
+            }
         } catch (error) {
             setIsLoading(false);
-            const errorMessage = error.response ? error.response.data.message : error.message;
-            Alert.alert('Kayıt Hatası', errorMessage || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+            Alert.alert(
+                'Hata',
+                error.response?.data?.message || 'Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+            );   
         }
     };
 
@@ -43,7 +59,7 @@ export const AuthProvider = ({ children }) => {
             const response = await api.post('auth/login', {
                 "username": email,
                 "password": password,
-            });
+            },{ _isLoginRequest: true });
 
             const userInfo = response.data;
             if (userInfo) {
@@ -62,8 +78,11 @@ export const AuthProvider = ({ children }) => {
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
-            Alert.alert('Hata', `Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyin.`);
-        }
+            Alert.alert(
+                'Hata',
+                error.response?.data?.message || 'Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+            );      
+          }
     };
 
     const logout = async () => {

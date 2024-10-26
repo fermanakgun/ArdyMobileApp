@@ -23,16 +23,7 @@ const SettingsScreen = () => {
       }
 
     } catch (error) {      
-      if (error.response) {
-        // API'den gelen yanıt varsa
-        Alert.alert('Hata', `API Hatası: ${error.response.data}`);
-      } else if (error.request) {
-        // İstek gönderilmiş ama yanıt alınamamışsa
-        Alert.alert('Hata', `API ile bağlantı kurulamadı.: ${error.request}`);
-      } else {
-        // Diğer hatalar
-        Alert.alert('Hata', `Hata: ${error.message}`);
-      }
+     
     }
   };
 

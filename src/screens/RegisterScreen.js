@@ -1,45 +1,106 @@
-import React, { useContext, useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
+import React, { useContext, useState,useEffect } from 'react';
+import { Text, TextInput, TouchableOpacity, View, StyleSheet, Alert,TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 
 const RegisterScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [password, setPassword] = useState('');
-    const { isLoading,register } = useContext(AuthContext);
-
+    const [rePassword, setRePassword] = useState('');
+    const { isLoading, register } = useContext(AuthContext);
 
     const handleRegister = () => {
-        if (!email || !password) {
+        // Tüm alanların doldurulması kontrolü
+        if (!email || !firstName || !lastName || !password || !rePassword) {
             Alert.alert('Hata', 'Lütfen tüm alanları doldurun.');
             return;
         }
 
-        register('ferman', email, password);
+        // E-posta formatı kontrolü
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert('Hata', 'Geçerli bir e-posta adresi girin.');
+            return;
+        }
+
+        // Şifre uzunluğu kontrolü
+        if (password.length < 6) {
+            Alert.alert('Hata', 'Şifre en az 6 karakter uzunluğunda olmalıdır.');
+            return;
+        }
+
+        // Şifrelerin eşleşme kontrolü
+        if (password !== rePassword) {
+            Alert.alert('Hata', 'Şifreler eşleşmiyor.');
+            return;
+        }
+
+        // Kayıt işlemi
+        register(firstName,lastName, email, password,navigation);
     };
 
+    const pageload= async ()=>{
+        if (__DEV__) {
+            setEmail("fermanakgun@hotmail.com.tr");
+            setPassword("fermanakgun");
+            setRePassword("fermanakgun");
+            setLastName("Test");
+            setFirstName("Deneme");
+          }
+    
+    }
+
+    useEffect(()=>{
+        pageload();
+    },[]);
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
-            <Spinner visible={isLoading} animation='fade'></Spinner>
+            <Spinner visible={isLoading} animation='fade' />
             <View style={styles.wrapper}>
                 <Text style={styles.title}>Kayıt Ol</Text>
-                <TextInput 
-                    style={styles.input} 
-                    placeholder='Email Girin' 
-                    autoCapitalize='none' 
-                    value={email} 
-                    onChangeText={setEmail} 
+
+                <TextInput
+                    style={styles.input}
+                    placeholder='Adınızı Girin'
+                    value={firstName}
+                    onChangeText={setFirstName}
                 />
-                <TextInput 
-                    style={styles.input} 
-                    placeholder='Şifre Girin' 
-                    secureTextEntry 
-                    value={password} 
-                    onChangeText={setPassword} 
+                <TextInput
+                    style={styles.input}
+                    placeholder='Soyadınızı Girin'
+                    value={lastName}
+                    onChangeText={setLastName}
                 />
+                <TextInput
+                    style={styles.input}
+                    placeholder='Email Girin'
+                    autoCapitalize='none'
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType='email-address'
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder='Şifre Girin'
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder='Şifreyi Tekrar Girin'
+                    secureTextEntry
+                    value={rePassword}
+                    onChangeText={setRePassword}
+                />
+
                 <TouchableOpacity style={styles.button} onPress={handleRegister}>
                     <Text style={styles.buttonText}>Kayıt Ol</Text>
                 </TouchableOpacity>
+
                 <View style={styles.footer}>
                     <Text>Hesabınız var mı? </Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -48,6 +109,8 @@ const RegisterScreen = ({ navigation }) => {
                 </View>
             </View>
         </View>
+        </TouchableWithoutFeedback>
+
     );
 };
 

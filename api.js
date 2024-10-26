@@ -64,23 +64,26 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Eğer access token süresi dolmuşsa ve yanıt 401 ise
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const newAccessToken = await refreshToken();
-        axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        return api(originalRequest); // İsteği yeni token ile tekrar gönder
-      } catch (err) {
-        console.log("Error after RefreshToken:", err);
-        await clearTokens();
-
-        // Eğer logout fonksiyonu mevcutsa çağır
-        if (logoutFunction) logoutFunction();
+    // Eğer 401 durum kodu dönerse ve istek bir login değilse
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      // Eğer istek login değilse refreshToken kullan
+      if (!originalRequest._isLoginRequest) {
+        originalRequest._retry = true;
         
-        return Promise.reject(err);
+        try {
+          const newAccessToken = await refreshToken();
+          axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          return api(originalRequest); // İsteği yeni token ile tekrar gönder
+        } catch (err) {
+          console.log("Error after RefreshToken:", err);
+          await clearTokens();
+
+          // Eğer logout fonksiyonu mevcutsa çağır
+          if (logoutFunction) logoutFunction();
+          
+          return Promise.reject(err);
+        }
       }
     }
 
