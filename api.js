@@ -1,8 +1,13 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 // API base URL (API'nizin URL'sini girin)
-const API_URL = 'https://pratikyonetim.com/api';
+let API_URL = 'https://pratikyonetim.com/api';
+
+if (__DEV__) {
+  API_URL = 'http://localhost:40647/api';
+}
 
 // Axios instance oluşturma
 const api = axios.create({
@@ -53,7 +58,7 @@ const refreshToken = async () => {
 
     return newAccessToken;
   } catch (error) {
-    console.error('Error refreshing token', error);
+        Alert.alert("Error refreshing token",JSON.stringify(error));
     throw error; // Token yenilenmezse hata fırlatıyoruz
   }
 };
@@ -91,8 +96,7 @@ api.interceptors.response.use(
 
         return api(originalRequest); // İsteği yeni token ile tekrar gönder
       } catch (err) {
-        console.error('Error during token refresh:', err);
-
+        Alert.alert("RefreshTokenSonrasında",JSON.stringify(err));
         // Refresh token süresi dolmuşsa veya başka bir hata varsa token'ları temizliyoruz
         await clearTokens();
         return Promise.reject(err);

@@ -1,14 +1,40 @@
-import React, { useContext, useState } from 'react';
-import { Button, StyleSheet, Text, View, Image } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { Button, StyleSheet, Text, View, Alert } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { AuthContext } from '../context/AuthContext';
-import { launchImageLibrary } from 'react-native-image-picker';
-import { PhotoManipulator } from 'react-native-photo-manipulator';
-import { ImageFilter } from 'react-native-image-filter-kit';
-import Slider from '@react-native-community/slider';
+import api from '../../api';
 
 const SettingsScreen = () => {
+
   const { userInfo, logout, isLoading, customerInfo } = useContext(AuthContext);
+
+  useEffect(() => {
+    fermandeneme();
+  }, []);
+
+  const fermandeneme = async () => {
+    try {
+      const response = await api.post('/customer/getActiveCustomerInfo');
+
+      if (response.data && response.data.customer) {
+        Alert.alert('Bilgiler yeniden çekildi.', `${response.data.customer.Username}`);
+      } else {
+        Alert.alert('Hata', 'Müşteri bilgileri alınamadı.');
+      }
+
+    } catch (error) {      
+      if (error.response) {
+        // API'den gelen yanıt varsa
+        Alert.alert('Hata', `API Hatası: ${error.response.data}`);
+      } else if (error.request) {
+        // İstek gönderilmiş ama yanıt alınamamışsa
+        Alert.alert('Hata', `API ile bağlantı kurulamadı.: ${error.request}`);
+      } else {
+        // Diğer hatalar
+        Alert.alert('Hata', `Hata: ${error.message}`);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -17,7 +43,6 @@ const SettingsScreen = () => {
         Settings Sayfası {customerInfo?.FirstName} {customerInfo?.LastName}
       </Text>
       <Button title="Çıkış Yap" onPress={logout} />
-    
     </View>
   );
 };
@@ -31,26 +56,6 @@ const styles = StyleSheet.create({
   welcome: {
     fontSize: 18,
     marginBottom: 8,
-  },
-  image: {
-    width: 300,
-    height: 300,
-    marginVertical: 20,
-  },
-  filteredImage: {
-    width: 300,
-    height: 300,
-    marginVertical: 20,
-  },
-  slider: {
-    width: 200,
-    height: 40,
-  },
-  sliderContainer: {
-    marginVertical: 10,
-  },
-  filterButtons: {
-    marginVertical: 10,
   },
 });
 

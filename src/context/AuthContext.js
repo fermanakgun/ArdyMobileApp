@@ -15,18 +15,6 @@ const[splashLoading,setSplashLoading] = useState(false);
 
     const register = async (name, email, password) => {
 
-//var apiClient= new ApiClient();
-
-// apiClient.get('/example-endpoint', null)
-//   .then(response => {
-//     // Handle the successful response
-//     console.log('API Response:', response.data);
-//   })
-//   .catch(error => {
-//     // Handle errors, including token-related errors
-//     console.error('API Error:', error);
-//   });
-
         setIsLoading(true);
         try {
             const response = await axios.post('https://fermantest.free.beeceptor.com/register', {
@@ -49,7 +37,6 @@ const[splashLoading,setSplashLoading] = useState(false);
         } catch (error) {
             setIsLoading(false);
             const errorMessage = error.response ? error.response.data.message : error.message;
-            console.error("Registration error:", errorMessage);
             Alert.alert('Kayıt Hatası', errorMessage || 'Bir hata oluştu. Lütfen tekrar deneyin.');
         }
     };
@@ -82,13 +69,10 @@ const[splashLoading,setSplashLoading] = useState(false);
         } catch (error) {
             setIsLoading(false);
             if (error.response) {
-                console.log('API Error Response:', error.response);
                 Alert.alert('Hata', `API Yanıt Hatası: ${error.response.data.message}`);
             } else if (error.request) {
-                console.log('API Error Request:', error.request);
-                Alert.alert('Hata', 'API ile bağlantı kurulamadı.');
+                Alert.alert('Hata', 'API ile bağlantı kurulamadı.'+error.request);
             } else {
-                console.log('General Error:', error.message);
                 Alert.alert('Hata', `Genel Hata: ${error.message}`);
             }
         }
@@ -102,7 +86,7 @@ const[splashLoading,setSplashLoading] = useState(false);
           AsyncStorage.removeItem('userInfo');
           setUserInfo({});
         } catch (error) {
-          console.error('Logout error', error);
+            Alert.alert('Logout error', 'Kullanıcı durumu kontrol edilirken bir hata oluştu.'+error);
         }
       };
 
@@ -129,10 +113,8 @@ const[splashLoading,setSplashLoading] = useState(false);
             }
     
         } catch (errorMessage) {
-            console.error("isUserLoggedIn error:", errorMessage);
-    
             // Burada doğrudan string kullanın
-            Alert.alert('Hata', 'Kullanıcı durumu kontrol edilirken bir hata oluştu.');
+            Alert.alert('Hata', 'Kullanıcı durumu kontrol edilirken bir hata oluştu.'+JSON.stringify(errorMessage));
         } finally {
             setSplashLoading(false); // Splash loading state false
         }
