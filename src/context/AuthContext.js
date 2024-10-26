@@ -62,24 +62,25 @@ export const AuthProvider = ({ children }) => {
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
-            if (error.response) {
-                Alert.alert('Hata', `API Yanıt Hatası: ${error.response.data.message}`);
-            } else if (error.request) {
-                Alert.alert('Hata', 'API ile bağlantı kurulamadı.' + error.request);
-            } else {
-                Alert.alert('Hata', `Genel Hata: ${error.message}`);
-            }
+            Alert.alert('Hata', `Beklenmedik bir hata oluştu.Lütfen daha sonra tekrar deneyin.`);
         }
     };
 
     const logout = async () => {
         try {
-            const response = await api.post('/auth/logout'); 
-            AsyncStorage.removeItem('userInfo');
+            // Sunucuya logout isteği gönder
+            await api.post('/auth/logout');
+        } catch (error) {
+            // Eğer sunucuya erişilemiyorsa veya hata varsa bu kısmı çalıştır
+            console.log('Logout sırasında sunucu hatası:', error);
+        } finally {
+            // Sunucu erişilse de erişilmese de local storage temizlenir ve kullanıcı bilgileri sıfırlanır
+            await AsyncStorage.removeItem('access_token');
+            await AsyncStorage.removeItem('refresh_token');
+            await AsyncStorage.removeItem('userInfo');
+            await AsyncStorage.removeItem('customerInfo');
             setUserInfo({});
             setCustomerInfo({});
-        } catch (error) {
-            Alert.alert('Logout error', 'Kullanıcı durumu kontrol edilirken bir hata oluştu.' + error);
         }
     };
 
