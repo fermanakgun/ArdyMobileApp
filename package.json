@@ -20,6 +20,7 @@
     "gl-react-native": "^5.2.1",
     "react": "18.3.1",
     "react-native": "0.75.4",
+    "react-native-drawer-layout": "^3.3.2",
     "react-native-gesture-handler": "^2.20.2",
     "react-native-image-crop-picker": "^0.41.4",
     "react-native-image-filter-kit": "^0.8.0",
