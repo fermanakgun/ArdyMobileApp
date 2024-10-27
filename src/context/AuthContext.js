@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     const [snackbar, setSnackbar] = useState({ visible: false, message: "", color: "#007BFF" });
 
     const showMessage = (message, type = "success") => {
-        const color = type === "error" ? "red" : "#007BFF"; // Hata kırmızı, başarı mavi
+        const color = type === "error" ? "red" : "#007BFF";
         setSnackbar({ visible: true, message, color });
     };
 
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             setIsLoading(true);
-            const response = await api.post("auth/login", { username: email, password: password });
+            const response = await api.post("auth/login", { username: email, password: password },{ _isLoginRequest: true });
 
             const userInfo = response.data;
             if (userInfo) {
@@ -92,6 +92,26 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const changePassword = async (oldPassword, newPassword, confirmNewPassword) => {
+        setIsLoading(true);
+        try {
+            const response = await api.post("customer/changePassword", {
+                "OldPassword":oldPassword,
+                "NewPassword":newPassword,
+                "ConfirmNewPassword":confirmNewPassword,
+            });
+console.log(response.data);
+            showMessage(response.data.message || "Parola başarıyla değiştirildi", "success");
+        } catch (error) {
+            showMessage(
+                error.response?.data?.message || "Parola değişikliği sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+                "error"
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const isUserLoggedIn = async () => {
         try {
             setSplashLoading(true);
@@ -121,7 +141,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <PaperProvider>
-            <AuthContext.Provider value={{ isLoading, userInfo, customerInfo, splashLoading, register, login, logout }}>
+            <AuthContext.Provider value={{ isLoading, userInfo, customerInfo, splashLoading, register, login, logout, changePassword }}>
                 <View style={{ flex: 1 }}>
                     {children}
                     <Snackbar

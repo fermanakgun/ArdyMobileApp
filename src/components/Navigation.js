@@ -12,6 +12,7 @@ import SplashScreen from '../screens/SplashScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import Icon from 'react-native-vector-icons/Ionicons';
 import OtherScreen from '../screens/OtherScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,6 +89,7 @@ const DrawerNavigator = () => {
           })}
         />
         <Drawer.Screen name="OtherScreen" component={OtherScreen} />
+        <Drawer.Screen name="Şifre Değiştir" component={ChangePasswordScreen} />
       </Drawer.Navigator>
 
       <Modal
