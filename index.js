@@ -8,6 +8,7 @@ import App from './App';
 import { name as appName } from './app.json';
 import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import 'react-native-gesture-handler';
 
 const theme = {
   ...DefaultTheme,
