@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }) => {
                     {children}
                     <Snackbar
                         visible={snackbar.visible}
-                        onDismiss={() => setSnackbar({ visible: false, message: "", color: "#007BFF" })}
+                        onDismiss={() => setSnackbar({ ...snackbar, visible: false })}
                         duration={3000}
                         style={{ backgroundColor: snackbar.color }}
                     >

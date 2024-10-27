@@ -22,6 +22,7 @@
     "react-native-image-crop-picker": "^0.41.4",
     "react-native-image-filter-kit": "^0.8.0",
     "react-native-image-picker": "^7.1.2",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-loading-spinner-overlay": "^3.0.1",
     "react-native-paper": "^5.12.5",
     "react-native-permissions": "^5.0.1",

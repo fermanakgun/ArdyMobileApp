@@ -1,10 +1,11 @@
 import React, { useContext, useEffect } from 'react';
-import { Text, View, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { TextInput, Button, Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const theme = {
     ...DefaultTheme,
@@ -44,76 +45,69 @@ const LoginScreen = ({ navigation }) => {
 
     return (
         <PaperProvider theme={theme}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={styles.container}>
-                    <Spinner visible={isLoading} animation="fade" />
-                    <View style={styles.wrapper}>
-                        <Text style={styles.title}>Giriş Yap</Text>
+            <KeyboardAwareScrollView contentContainerStyle={styles.container} enableOnAndroid={true}>
+                <Spinner visible={isLoading} animation="fade" />
+                <View style={styles.wrapper}>
+                    <Text style={styles.title}>Giriş Yap</Text>
 
-                        <Formik
-                            initialValues={initialValues}
-                            validationSchema={validationSchema}
-                            onSubmit={handleLogin}
-                        >
-                            {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
-                                <>
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Email Girin"
-                                        placeholder="Email Girin"
-                                        value={values.email}
-                                        onChangeText={handleChange('email')}
-                                        onBlur={handleBlur('email')}
-                                        autoCapitalize="none"
-                                        keyboardType="email-address"
-                                        style={styles.input}
-                                        error={touched.email && errors.email}
-                                    />
-                                    {touched.email && errors.email && (
-                                        <Text style={styles.error}>{errors.email}</Text>
-                                    )}
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={validationSchema}
+                        onSubmit={handleLogin}
+                    >
+                        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                            <>
+                                <TextInput
+                                    mode="outlined"
+                                    label="Email Girin"
+                                    placeholder="Email Girin"
+                                    value={values.email}
+                                    onChangeText={handleChange('email')}
+                                    onBlur={handleBlur('email')}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    style={styles.input}
+                                    error={touched.email && errors.email}
+                                />
+                                {touched.email && errors.email && (
+                                    <Text style={styles.error}>{errors.email}</Text>
+                                )}
 
-                                    <TextInput
-                                        mode="outlined"
-                                        label="Şifre Girin"
-                                        placeholder="Şifre Girin"
-                                        value={values.password}
-                                        onChangeText={handleChange('password')}
-                                        onBlur={handleBlur('password')}
-                                        secureTextEntry
-                                        style={styles.input}
-                                        error={touched.password && errors.password}
-                                    />
-                                    {touched.password && errors.password && (
-                                        <Text style={styles.error}>{errors.password}</Text>
-                                    )}
+                                <TextInput
+                                    mode="outlined"
+                                    label="Şifre Girin"
+                                    placeholder="Şifre Girin"
+                                    value={values.password}
+                                    onChangeText={handleChange('password')}
+                                    onBlur={handleBlur('password')}
+                                    secureTextEntry
+                                    style={styles.input}
+                                    error={touched.password && errors.password}
+                                />
+                                {touched.password && errors.password && (
+                                    <Text style={styles.error}>{errors.password}</Text>
+                                )}
 
-                                    <Button
-                                        mode="contained"
-                                        onPress={handleSubmit}
-                                        style={styles.button}
-                                        labelStyle={{ fontSize: 18, fontWeight: 'bold' }}
-                                    >
-                                        Giriş Yap
-                                    </Button>
+                                <Button
+                                    mode="contained"
+                                    onPress={handleSubmit}
+                                    style={styles.button}
+                                    labelStyle={{ fontSize: 18, fontWeight: 'bold' }}
+                                >
+                                    Giriş Yap
+                                </Button>
 
-                                    <View style={styles.footer}>
-                                        <Text style={styles.footerText}>Hesabınız yok mu? </Text>
-                                        <Button
-                                            onPress={() => navigation.navigate('Register')}
-                                            compact
-                                            uppercase={false}
-                                            labelStyle={styles.link}
-                                        >
-                                            Kayıt Ol
-                                        </Button>
-                                    </View>
-                                </>
-                            )}
-                        </Formik>
-                    </View>
+                                <View style={styles.footer}>
+                                    <Text style={styles.footerText}>Hesabınız yok mu? </Text>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                                        <Text style={styles.link}>Kayıt Ol</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        )}
+                    </Formik>
                 </View>
-            </TouchableWithoutFeedback>
+            </KeyboardAwareScrollView>
         </PaperProvider>
     );
 };
