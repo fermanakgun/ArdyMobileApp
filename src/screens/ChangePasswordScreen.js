@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { Formik } from 'formik';
@@ -26,8 +26,12 @@ const ChangePasswordScreen = () => {
             .required('Parola doğrulaması gereklidir'),
     });
 
-    const handleSubmit = (values) => {
-        changePassword(values.oldPassword, values.newPassword, values.confirmNewPassword);
+    const handleSubmit = async (values, { resetForm }) => {
+        const isSuccess = await changePassword(values.oldPassword, values.newPassword, values.confirmNewPassword);
+        
+        if (isSuccess) {
+            resetForm(); // Parola değiştirildiyse formu sıfırla
+        }
     };
 
     return (

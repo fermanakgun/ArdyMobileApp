@@ -96,22 +96,31 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(true);
         try {
             const response = await api.post("customer/changePassword", {
-                "OldPassword":oldPassword,
-                "NewPassword":newPassword,
-                "ConfirmNewPassword":confirmNewPassword,
+                OldPassword: oldPassword,
+                NewPassword: newPassword,
+                ConfirmNewPassword: confirmNewPassword,
             });
-console.log(response.data);
-            showMessage(response.data.message || "Parola başarıyla değiştirildi", "success");
+    
+            // Yanıt içerisindeki isSuccess kontrolü
+            const { isSuccess, message } = response.data;
+    
+            if (isSuccess) {
+                showMessage(message || "Parola başarıyla değiştirildi", "success");
+                return true; // Başarılı
+            } else {
+                showMessage(message || "Parola değişikliği başarısız oldu.", "error");
+                return false; // Başarısız
+            }
         } catch (error) {
             showMessage(
                 error.response?.data?.message || "Parola değişikliği sırasında bir hata oluştu. Lütfen tekrar deneyin.",
                 "error"
             );
+            return false; // Hata durumunda başarısız
         } finally {
             setIsLoading(false);
         }
     };
-
     const isUserLoggedIn = async () => {
         try {
             setSplashLoading(true);
