@@ -4,6 +4,16 @@ import Navigation from './src/components/Navigation';
 import { AuthProvider } from './src/context/AuthContext';
 import PushNotification from 'react-native-push-notification';
 import api from './api';
+import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#007BFF', // Primary renginizi burada belirleyin
+  },
+};
 
 const App = () => {
 
@@ -18,19 +28,15 @@ const App = () => {
       onRegister: function (token) {
         Alert.alert("DeviceToken", JSON.stringify(token));
         console.log("DEVICE TOKEN:", token);
-        // Token'in doğru şekilde string olduğundan emin olun
         
-        // Eğer token.token yerine sadece token kullanılıyorsa değiştirin
         sendTokenToServer(token.token || token);
       },
 
       onNotification: function (notification) {
         console.log("NOTIFICATION:", notification);
-        // Kullanıcıya bildirimi gösterebilirsiniz
         Alert.alert("Notification", notification.message || "Bildirim alındı!");
       },
 
-      // İzinler
       permissions: {
         alert: true,
         badge: true,
@@ -55,8 +61,15 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <StatusBar backgroundColor="#06bcee" />
-      <Navigation />
+      <PaperProvider
+        theme={theme}
+        settings={{
+          icon: (props) => <Ionicons {...props} />,
+        }}
+      >
+        <StatusBar backgroundColor="#06bcee" />
+        <Navigation />
+      </PaperProvider>
     </AuthProvider>
   );
 };

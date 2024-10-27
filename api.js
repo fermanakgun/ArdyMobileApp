@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
 let API_URL = 'https://pratikyonetim.com/api';
-if (__DEV__) {
+if (__DEV__ && false) {
   API_URL = 'http://localhost:40647/api';
 }
 

@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { createContext, useEffect, useState } from "react";
-import { Alert } from "react-native";
-import api, { setLogout } from "../../api"; // setLogout'u ekliyoruz
+import { View } from "react-native";
+import { Snackbar, Provider as PaperProvider } from "react-native-paper";
+import api, { setLogout } from "../../api";
 
 export const AuthContext = createContext();
 
@@ -11,93 +12,81 @@ export const AuthProvider = ({ children }) => {
     const [customerInfo, setCustomerInfo] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [splashLoading, setSplashLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({ visible: false, message: "", color: "#007BFF" });
 
-    const register = async (name,lastName, email, password,navigation) => {
+    const showMessage = (message, type = "success") => {
+        const color = type === "error" ? "red" : "#007BFF"; // Hata kırmızı, başarı mavi
+        setSnackbar({ visible: true, message, color });
+    };
+
+    const register = async (name, lastName, email, password, navigation) => {
         setIsLoading(true);
         try {
-            let response = await api.post('auth/register',{
-                "FirstName":name,
-                "LastName":lastName,
-                "Email":email,
-                "Password":password
+            let response = await api.post("auth/register", {
+                FirstName: name,
+                LastName: lastName,
+                Email: email,
+                Password: password,
             });
-           
 
             const responseData = response.data;
-            console.log(JSON.stringify(responseData))
+            console.log(JSON.stringify(responseData));
             setIsLoading(false);
-            if(responseData.Token!=undefined){
-                //token varsa login yaptıralım.
+            if (responseData.Token != undefined) {
                 setUserInfo(responseData);
                 await AsyncStorage.multiSet([
-                    ['userInfo', JSON.stringify(responseData)],
-                    ['access_token', responseData.Token],
-                    ['refresh_token', responseData.RefreshToken],
+                    ["userInfo", JSON.stringify(responseData)],
+                    ["access_token", responseData.Token],
+                    ["refresh_token", responseData.RefreshToken],
                 ]);
-                
-                const getActiveCustomerInfo = await api.post('customer/getActiveCustomerInfo', {});
-                await AsyncStorage.setItem('customerInfo', JSON.stringify(getActiveCustomerInfo.data.customer));
+
+                const getActiveCustomerInfo = await api.post("customer/getActiveCustomerInfo", {});
+                await AsyncStorage.setItem("customerInfo", JSON.stringify(getActiveCustomerInfo.data.customer));
                 setCustomerInfo(getActiveCustomerInfo.data.customer);
-                Alert.alert('Kayıt Başarılı', `${JSON.stringify(getActiveCustomerInfo.data.customer.Username)}`);
-            }else{
-                Alert.alert('Kayıt Başarılı', responseData.Message || 'Kayıt işlemi başarılı.');
-                navigation.navigate('Login');
-            //Burada login ekranına yönlendirmek istiyorum.
+                showMessage(`Kayıt Başarılı: ${getActiveCustomerInfo.data.customer.Username}`, "success");
+            } else {
+                showMessage(responseData.Message || "Kayıt işlemi başarılı.", "success");
+                navigation.navigate("Login");
             }
         } catch (error) {
             setIsLoading(false);
-            Alert.alert(
-                'Hata',
-                error.response?.data?.message || 'Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
-            );   
+            showMessage(error.response?.data?.message || "Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.", "error");
         }
     };
 
     const login = async (email, password) => {
         try {
             setIsLoading(true);
-            const response = await api.post('auth/login', {
-                "username": email,
-                "password": password,
-            },{ _isLoginRequest: true });
+            const response = await api.post("auth/login", { username: email, password: password });
 
             const userInfo = response.data;
             if (userInfo) {
                 setUserInfo(userInfo);
-                await AsyncStorage.setItem('access_token', userInfo.Token);
-                await AsyncStorage.setItem('refresh_token', userInfo.RefreshToken);
-                await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+                await AsyncStorage.setItem("access_token", userInfo.Token);
+                await AsyncStorage.setItem("refresh_token", userInfo.RefreshToken);
+                await AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
 
-                const getActiveCustomerInfo = await api.post('customer/getActiveCustomerInfo', {});
-                await AsyncStorage.setItem('customerInfo', JSON.stringify(getActiveCustomerInfo.data.customer));
+                const getActiveCustomerInfo = await api.post("customer/getActiveCustomerInfo", {});
+                await AsyncStorage.setItem("customerInfo", JSON.stringify(getActiveCustomerInfo.data.customer));
                 setCustomerInfo(getActiveCustomerInfo.data.customer);
-                Alert.alert('Giriş Başarılı', `${JSON.stringify(getActiveCustomerInfo.data.customer.Username)}`);
+                showMessage(`Giriş Başarılı: ${getActiveCustomerInfo.data.customer.Username}`, "success");
             } else {
-                Alert.alert('Giriş Başarısız', 'Giriş sırasında beklenmedik bir hata oluştu.');
+                showMessage("Giriş sırasında beklenmedik bir hata oluştu.", "error");
             }
             setIsLoading(false);
         } catch (error) {
             setIsLoading(false);
-            Alert.alert(
-                'Hata',
-                error.response?.data?.message || 'Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
-            );      
-          }
+            showMessage(error.response?.data?.message || "Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.", "error");
+        }
     };
 
     const logout = async () => {
         try {
-            // Sunucuya logout isteği gönder
-            await api.post('/auth/logout');
+            await api.post("/auth/logout");
         } catch (error) {
-            // Eğer sunucuya erişilemiyorsa veya hata varsa bu kısmı çalıştır
-            console.log('Logout sırasında sunucu hatası:', error);
+            console.log("Logout sırasında sunucu hatası:", error);
         } finally {
-            // Sunucu erişilse de erişilmese de local storage temizlenir ve kullanıcı bilgileri sıfırlanır
-            await AsyncStorage.removeItem('access_token');
-            await AsyncStorage.removeItem('refresh_token');
-            await AsyncStorage.removeItem('userInfo');
-            await AsyncStorage.removeItem('customerInfo');
+            await AsyncStorage.multiRemove(["access_token", "refresh_token", "userInfo", "customerInfo"]);
             setUserInfo({});
             setCustomerInfo({});
         }
@@ -105,34 +94,46 @@ export const AuthProvider = ({ children }) => {
 
     const isUserLoggedIn = async () => {
         try {
-            setSplashLoading(true); 
+            setSplashLoading(true);
 
-            let userInfo = await AsyncStorage.getItem('userInfo');
+            let userInfo = await AsyncStorage.getItem("userInfo");
             if (userInfo) {
-                userInfo = JSON.parse(userInfo); 
+                userInfo = JSON.parse(userInfo);
                 setUserInfo(userInfo);
             }
 
-            let customerInfo = await AsyncStorage.getItem('customerInfo');
+            let customerInfo = await AsyncStorage.getItem("customerInfo");
             if (customerInfo) {
-                customerInfo = JSON.parse(customerInfo); 
+                customerInfo = JSON.parse(customerInfo);
                 setCustomerInfo(customerInfo);
             }
         } catch (errorMessage) {
-            Alert.alert('Hata', 'Kullanıcı durumu kontrol edilirken bir hata oluştu.' + JSON.stringify(errorMessage));
+            showMessage("Kullanıcı durumu kontrol edilirken bir hata oluştu.", "error");
         } finally {
-            setSplashLoading(false); 
+            setSplashLoading(false);
         }
     };
 
     useEffect(() => {
         isUserLoggedIn();
-        setLogout(logout); // logout fonksiyonunu api.js'deki setLogout fonksiyonuna iletin
+        setLogout(logout);
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isLoading, userInfo, customerInfo, splashLoading, register, login, logout }}>
-            {children}
-        </AuthContext.Provider>
+        <PaperProvider>
+            <AuthContext.Provider value={{ isLoading, userInfo, customerInfo, splashLoading, register, login, logout }}>
+                <View style={{ flex: 1 }}>
+                    {children}
+                    <Snackbar
+                        visible={snackbar.visible}
+                        onDismiss={() => setSnackbar({ visible: false, message: "", color: "#007BFF" })}
+                        duration={3000}
+                        style={{ backgroundColor: snackbar.color }}
+                    >
+                        {snackbar.message}
+                    </Snackbar>
+                </View>
+            </AuthContext.Provider>
+        </PaperProvider>
     );
 };
