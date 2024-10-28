@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
 let API_URL = 'https://pratikyonetim.com/api';
-if (__DEV__) {
+if (__DEV__ && false) {
   API_URL = 'http://localhost:40647/api';
 }
 
@@ -24,6 +24,7 @@ export const setLogout = (logout) => {
 // Access ve refresh token işlemleri
 const getAccessToken = async () => await AsyncStorage.getItem('access_token');
 const getRefreshToken = async () => await AsyncStorage.getItem('refresh_token');
+const getDeviceToken = async () => await AsyncStorage.getItem('deviceToken'); // Device token'ı almak için yeni fonksiyon
 const setAccessToken = async (token) => await AsyncStorage.setItem('access_token', token);
 const setRefreshToken = async (token) => await AsyncStorage.setItem('refresh_token', token);
 const clearTokens = async () => {
@@ -48,11 +49,13 @@ const refreshToken = async () => {
   }
 };
 
-// Interceptor: istekten önce token ekleme
+// Interceptor: istekten önce token ve deviceToken ekleme
 api.interceptors.request.use(
   async (config) => {
     const accessToken = await getAccessToken();
+    const deviceToken = await getDeviceToken();  // deviceToken'ı alıyoruz
     if (accessToken) config.headers['Authorization'] = `Bearer ${accessToken}`;
+    if (deviceToken) config.headers['DeviceToken'] = deviceToken;  // deviceToken'ı header olarak ekliyoruz
     return config;
   },
   (error) => Promise.reject(error)
@@ -72,8 +75,12 @@ api.interceptors.response.use(
         
         try {
           const newAccessToken = await refreshToken();
+    const deviceToken = await getDeviceToken();  // deviceToken'ı alıyoruz
           axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+          axios.defaults.headers.common['DeviceToken'] = deviceToken;
+          
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['DeviceToken'] = deviceToken;
           return api(originalRequest); // İsteği yeni token ile tekrar gönder
         } catch (err) {
           console.log("Error after RefreshToken:", err);

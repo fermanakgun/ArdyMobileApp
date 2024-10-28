@@ -5,6 +5,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import PushNotification from 'react-native-push-notification';
 import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const theme = {
   ...DefaultTheme,
@@ -17,7 +18,7 @@ const theme = {
 const App = () => {
   useEffect(() => {
     configurePushNotifications();
-    sendWelcomeNotification(); // Uygulama açıldığında bildirim gönder
+    //sendWelcomeNotification();
   }, []);
 
   const configurePushNotifications = () => {
@@ -36,8 +37,7 @@ const App = () => {
     PushNotification.configure({
       // Cihaz token alındığında çağrılır
       onRegister: function (token) {
-        console.log("Device Token:", token.token);
-        Alert.alert("Device Token", token.token);
+        AsyncStorage.setItem("deviceToken", token.token);  // Token'ı kaydediyoruz
       },
 
       // Bildirim alındığında çağrılır
