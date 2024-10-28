@@ -24,14 +24,17 @@
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    
+
     <!-- Push Bildirim İzinleri -->
     <key>UIBackgroundModes</key>
     <array>
         <string>fetch</string>
         <string>remote-notification</string>
     </array>
-    
+    <key>NSPushNotificationUsageDescription</key>
+    <string>Uygulamanın bildirim gönderebilmesi için izninize ihtiyacımız var.</string>
+
+    <!-- Uygulama Güvenliği Ayarları -->
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>
@@ -40,22 +43,17 @@
         <true/>
     </dict>
 
-    <!-- Fotoğraf Kütüphanesi İzni -->
+    <!-- Bildirim İzinleri ve Erişim -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Konumunuzu kullanmak için izninize ihtiyacımız var.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Fotoğraflarınızı seçmek için galerideki resimlerinize erişim izni gerekiyor.</string>
-
-    <!-- Kamera İzni -->
     <key>NSCameraUsageDescription</key>
     <string>Fotoğraf çekmek için kameraya erişim izni gerekiyor.</string>
-
-    <!-- Fotoğraf Kütüphanesine Yazma İzni -->
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>Fotoğrafları kaydetmek için galeriye erişim izni gerekiyor.</string>
 
-    <!-- Konum İzni -->
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Konumunuzu kullanmak için izninize ihtiyacımız var.</string>
-
+    <!-- Ekran ve Uygulama Ayarları -->
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
     <key>UIRequiredDeviceCapabilities</key>
@@ -70,6 +68,8 @@
     </array>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+
+    <!-- Font Ayarları -->
     <key>UIAppFonts</key>
     <array>
         <string>AntDesign.ttf</string>
@@ -88,11 +88,8 @@
         <string>Octicons.ttf</string>
         <string>Zocial.ttf</string>
     </array>
-    
-    <!-- Push Bildirim İzinleri -->
-    <key>NSPushNotificationUsageDescription</key>
-    <string>Uygulamanın bildirim gönderebilmesi için izninize ihtiyacımız var.</string>
 
+    <!-- Kriptografi Kullanımı -->
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
 </dict>

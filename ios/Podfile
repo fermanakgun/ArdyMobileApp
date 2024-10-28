@@ -1,11 +1,11 @@
-# Resolve react_native_pods.rb with node to allow for hoisting
+# Podfile
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
     "react-native/scripts/react_native_pods.rb",
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '13.4'  # Minimum iOS sürümünü burada belirleyebilirsiniz
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -17,23 +17,23 @@ end
 target 'ArdyMobileApp' do
   config = use_native_modules!
 
-  # Hermes'i devre dışı bırak
+  # Hermes'i devre dışı bırakıyoruz
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
-    :hermes_enabled => false, # Hermes'i devre dışı bırakıyoruz
+    :hermes_enabled => false, # Hermes devre dışı
   )
 
-  # Eğer react-native-push-notification kullanıyorsanız bu satırı ekleyin
+  # react-native-push-notification için gerekli bağımlılığı ekleyin
   pod 'RNCPushNotificationIOS', :path => '../node_modules/@react-native-community/push-notification-ios'
 
-  # Diğer olası kütüphaneler için örnekler (İhtiyacınıza göre kaldırabilirsiniz)
+  # Diğer ek kütüphaneler burada eklenebilir
   # pod 'ReactNativeAsyncStorage', :path => '../node_modules/@react-native-async-storage/async-storage'
 
   target 'ArdyMobileAppTests' do
     inherit! :complete
-    # Pods for testing
+    # Test bağımlılıkları
   end
 
   post_install do |installer|
@@ -43,7 +43,7 @@ target 'ArdyMobileApp' do
     # Build ayarları düzeltmeleri
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['ENABLE_BITCODE'] = 'NO' # Bitcode devre dışı bırak
+        config.build_settings['ENABLE_BITCODE'] = 'NO' # Bitcode devre dışı
         config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym' # dSYM dosyalarını oluştur
       end
     end
