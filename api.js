@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
 let API_URL = 'https://pratikyonetim.com/api';
-if (__DEV__ && false) {
+if (__DEV__) {
   API_URL = 'http://localhost:40647/api';
 }
 
@@ -72,13 +72,13 @@ api.interceptors.response.use(
       // Eğer istek login değilse refreshToken kullan
       if (!originalRequest._isLoginRequest) {
         originalRequest._retry = true;
-        
+
         try {
           const newAccessToken = await refreshToken();
-    const deviceToken = await getDeviceToken();  // deviceToken'ı alıyoruz
+          const deviceToken = await getDeviceToken();  // deviceToken'ı alıyoruz
           axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
           axios.defaults.headers.common['DeviceToken'] = deviceToken;
-          
+
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           originalRequest.headers['DeviceToken'] = deviceToken;
           return api(originalRequest); // İsteği yeni token ile tekrar gönder
@@ -88,7 +88,7 @@ api.interceptors.response.use(
 
           // Eğer logout fonksiyonu mevcutsa çağır
           if (logoutFunction) logoutFunction();
-          
+
           return Promise.reject(err);
         }
       }
