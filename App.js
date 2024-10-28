@@ -45,7 +45,7 @@ const App = () => {
         console.log("Notification:", notification);
         Alert.alert("Notification", notification.message || "Bildirim alındı!");
         
-        notification.finish(PushNotification.FetchResult.NoData);
+        //notification.finish(PushNotification.FetchResult.NoData);
       },
       permissions: {
         alert: true,
