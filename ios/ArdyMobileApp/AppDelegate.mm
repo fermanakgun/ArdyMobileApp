@@ -34,6 +34,7 @@
 #endif
 }
 
+
 // Cihazın başarıyla bir DeviceToken alması durumunda çağrılan metod
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
@@ -44,11 +45,7 @@
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
-  if (userInfo) {
-    [RNCPushNotificationIOS didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
-  } else {
-    completionHandler(UIBackgroundFetchResultNoData);
-  }
+  [RNCPushNotificationIOS didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
 }
 
 // Cihazın bir DeviceToken alırken hata alması durumunda çağrılan metod
