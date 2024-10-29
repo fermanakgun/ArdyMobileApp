@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { TextInput, Button, Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const theme = {
@@ -44,8 +45,18 @@ const LoginScreen = ({ navigation }) => {
     }, []);
 
     const handleLogin = async (values) => {
-        // Login işlemi başarılı olursa e-posta adresini kaydet
-         await login(values.email, values.password);
+        await login(values.email, values.password);
+    };
+
+    const clearEmail = async (setFieldValue) => {
+        // E-posta verisini AsyncStorage'den sil ve form değerini boşalt
+        try {
+            await AsyncStorage.removeItem('lastEmail');
+            setInitialEmail(''); // initialEmail state'ini temizle
+            setFieldValue('email', ''); // Formik içindeki email alanını temizle
+        } catch (error) {
+            console.log("E-posta silme hatası:", error);
+        }
     };
 
     return (
@@ -56,25 +67,36 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.title}>Giriş Yap</Text>
 
                     <Formik
-                        initialValues={{ email: initialEmail, password: '' }}  // E-posta değerini AsyncStorage'dan gelen değerle başlatıyoruz
+                        initialValues={{ email: initialEmail, password: '' }}
                         validationSchema={validationSchema}
                         onSubmit={handleLogin}
                         enableReinitialize
                     >
-                        {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                        {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
                             <>
-                                <TextInput
-                                    mode="outlined"
-                                    label="Email Girin"
-                                    placeholder="Email Girin"
-                                    value={values.email}
-                                    onChangeText={handleChange('email')}
-                                    onBlur={handleBlur('email')}
-                                    autoCapitalize="none"
-                                    keyboardType="email-address"
-                                    style={styles.input}
-                                    error={touched.email && errors.email}
-                                />
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        mode="outlined"
+                                        label="Email Girin"
+                                        placeholder="Email Girin"
+                                        value={values.email}
+                                        onChangeText={handleChange('email')}
+                                        onBlur={handleBlur('email')}
+                                        autoCapitalize="none"
+                                        keyboardType="email-address"
+                                        style={styles.input}
+                                        error={touched.email && errors.email}
+                                    />
+                                    {values.email ? (
+                                        <MaterialCommunityIcons
+                                            name="close-circle"
+                                            size={24}
+                                            color="gray"
+                                            style={styles.clearIcon}
+                                            onPress={() => clearEmail(setFieldValue)}
+                                        />
+                                    ) : null}
+                                </View>
                                 {touched.email && errors.email && (
                                     <Text style={styles.error}>{errors.email}</Text>
                                 )}
@@ -146,9 +168,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#007BFF',
     },
+    inputContainer: {
+        position: 'relative',
+        width: '100%',
+    },
     input: {
         marginBottom: 15,
         backgroundColor: '#f9f9f9',
+    },
+    clearIcon: {
+        position: 'absolute',
+        right: 10,
+        top: '50%', // Yarıya yerleştir
+        transform: [{ translateY: -15 }], // İkonun yüksekliğinin yarısını çıkararak ortalar
     },
     button: {
         marginTop: 20,
@@ -176,5 +208,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 });
+
 
 export default LoginScreen;
