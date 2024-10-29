@@ -32,7 +32,6 @@ const LoginScreen = ({ navigation }) => {
     const [initialEmail, setInitialEmail] = useState('');
 
     useEffect(() => {
-        // Uygulama açıldığında son kullanılan e-posta adresini almak için AsyncStorage'i kontrol edin
         const getEmail = async () => {
             try {
                 const savedEmail = await AsyncStorage.getItem('lastEmail');
@@ -49,7 +48,6 @@ const LoginScreen = ({ navigation }) => {
     };
 
     const clearEmail = async (setFieldValue) => {
-        // E-posta verisini AsyncStorage'den sil ve form değerini boşalt
         try {
             await AsyncStorage.removeItem('lastEmail');
             setInitialEmail(''); // initialEmail state'ini temizle
@@ -87,7 +85,7 @@ const LoginScreen = ({ navigation }) => {
                                         style={styles.input}
                                         error={touched.email && errors.email}
                                     />
-                                    {values.email ? (
+                                    {initialEmail ? ( // Sadece initialEmail varsa ikonu göster
                                         <MaterialCommunityIcons
                                             name="close-circle"
                                             size={24}
@@ -179,8 +177,8 @@ const styles = StyleSheet.create({
     clearIcon: {
         position: 'absolute',
         right: 10,
-        top: '50%', // Yarıya yerleştir
-        transform: [{ translateY: -15 }], // İkonun yüksekliğinin yarısını çıkararak ortalar
+        top: '50%',
+        transform: [{ translateY: -15 }],
     },
     button: {
         marginTop: 20,
@@ -208,6 +206,5 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
 });
-
 
 export default LoginScreen;
