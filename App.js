@@ -17,7 +17,7 @@ const theme = {
 
 const App = () => {
   useEffect(() => {
-    configurePushNotifications();
+    //configurePushNotifications();
     //sendWelcomeNotification();
   }, []);
 
