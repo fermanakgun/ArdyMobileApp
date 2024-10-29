@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
                     ["userInfo", JSON.stringify(responseData)],
                     ["access_token", responseData.Token],
                     ["refresh_token", responseData.RefreshToken],
+                    ["lastEmail", email], // E-posta adresini kaydediyoruz
                 ]);
 
                 const getActiveCustomerInfo = await api.post("customer/getActiveCustomerInfo", {});
@@ -57,14 +58,17 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             setIsLoading(true);
-            const response = await api.post("auth/login", { username: email, password: password },{ _isLoginRequest: true });
+            const response = await api.post("auth/login", { username: email, password: password }, { _isLoginRequest: true });
 
             const userInfo = response.data;
             if (userInfo) {
                 setUserInfo(userInfo);
-                await AsyncStorage.setItem("access_token", userInfo.Token);
-                await AsyncStorage.setItem("refresh_token", userInfo.RefreshToken);
-                await AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
+                await AsyncStorage.multiSet([
+                    ["access_token", userInfo.Token],
+                    ["refresh_token", userInfo.RefreshToken],
+                    ["userInfo", JSON.stringify(userInfo)],
+                    ["lastEmail", email], // E-posta adresini kaydediyoruz
+                ]);
 
                 const getActiveCustomerInfo = await api.post("customer/getActiveCustomerInfo", {});
                 await AsyncStorage.setItem("customerInfo", JSON.stringify(getActiveCustomerInfo.data.customer));
@@ -86,6 +90,7 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.log("Logout sırasında sunucu hatası:", error);
         } finally {
+            // E-posta adresi hariç diğer verileri siliyoruz
             await AsyncStorage.multiRemove(["access_token", "refresh_token", "userInfo", "customerInfo"]);
             setUserInfo({});
             setCustomerInfo({});
@@ -101,26 +106,26 @@ export const AuthProvider = ({ children }) => {
                 ConfirmNewPassword: confirmNewPassword,
             });
     
-            // Yanıt içerisindeki isSuccess kontrolü
             const { isSuccess, message } = response.data;
     
             if (isSuccess) {
                 showMessage(message || "Parola başarıyla değiştirildi", "success");
-                return true; // Başarılı
+                return true;
             } else {
                 showMessage(message || "Parola değişikliği başarısız oldu.", "error");
-                return false; // Başarısız
+                return false;
             }
         } catch (error) {
             showMessage(
                 error.response?.data?.message || "Parola değişikliği sırasında bir hata oluştu. Lütfen tekrar deneyin.",
                 "error"
             );
-            return false; // Hata durumunda başarısız
+            return false;
         } finally {
             setIsLoading(false);
         }
     };
+
     const isUserLoggedIn = async () => {
         try {
             setSplashLoading(true);

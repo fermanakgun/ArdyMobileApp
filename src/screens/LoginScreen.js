@@ -1,5 +1,6 @@
-import React, { useContext, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { Formik } from 'formik';
@@ -27,21 +28,25 @@ const validationSchema = Yup.object().shape({
 
 const LoginScreen = ({ navigation }) => {
     const { isLoading, login } = useContext(AuthContext);
-
-    const handleLogin = (values) => {
-        login(values.email, values.password);
-    };
-
-    // Development ortamında otomatik doldurma
-    const initialValues = __DEV__
-        ? { email: 'fermanakgun@gmail.com', password: 'fermanakgun' }
-        : { email: '', password: '' };
+    const [initialEmail, setInitialEmail] = useState('');
 
     useEffect(() => {
-        if (__DEV__) {
-            console.log("Development ortamında: Otomatik doldurma etkin.");
-        }
+        // Uygulama açıldığında son kullanılan e-posta adresini almak için AsyncStorage'i kontrol edin
+        const getEmail = async () => {
+            try {
+                const savedEmail = await AsyncStorage.getItem('lastEmail');
+                if (savedEmail) setInitialEmail(savedEmail);
+            } catch (error) {
+                console.log("E-posta alma hatası:", error);
+            }
+        };
+        getEmail();
     }, []);
+
+    const handleLogin = async (values) => {
+        // Login işlemi başarılı olursa e-posta adresini kaydet
+         await login(values.email, values.password);
+    };
 
     return (
         <PaperProvider theme={theme}>
@@ -51,9 +56,10 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.title}>Giriş Yap</Text>
 
                     <Formik
-                        initialValues={initialValues}
+                        initialValues={{ email: initialEmail, password: '' }}  // E-posta değerini AsyncStorage'dan gelen değerle başlatıyoruz
                         validationSchema={validationSchema}
                         onSubmit={handleLogin}
+                        enableReinitialize
                     >
                         {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                             <>
