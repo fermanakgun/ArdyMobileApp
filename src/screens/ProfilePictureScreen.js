@@ -19,21 +19,24 @@ const ProfilePictureScreen = () => {
 
     return (
         <View style={styles.container}>
-            {/* Mevcut profil fotoğrafı */}
-            {customerInfo.ProfilePictureUrl ? (
-                <Image 
-                    source={{ uri: customerInfo.ProfilePictureUrl }} 
-                    style={styles.profileImage} 
-                />
-            ) : (
-                <View style={styles.placeholderImage} /> // Varsayılan görünüm
-            )}
+            {/* Profil fotoğrafı veya yükleme animasyonu */}
+            <View style={styles.imageContainer}>
+                {(isLoading || loading) ? (
+                    <ActivityIndicator size="large" color="#0000ff" />
+                ) : (
+                    customerInfo.ProfilePictureUrl ? (
+                        <Image 
+                            source={{ uri: customerInfo.ProfilePictureUrl }} 
+                            style={styles.profileImage} 
+                        />
+                    ) : (
+                        <View style={styles.placeholderImage} /> // Varsayılan görünüm
+                    )
+                )}
+            </View>
 
             {/* Fotoğraf değiştirme butonu */}
             <Button title="Profil Fotoğrafını Değiştir" onPress={selectProfilePicture} />
-
-            {/* Yükleme animasyonu */}
-            {(isLoading || loading) && <ActivityIndicator size="large" color="#0000ff" />}
         </View>
     );
 };
@@ -44,18 +47,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    profileImage: {
+    imageContainer: {
         width: 150,
         height: 150,
-        borderRadius: 75,
+        alignItems: 'center',
+        justifyContent: 'center',
         marginBottom: 20,
     },
+    profileImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 75,
+    },
     placeholderImage: {
-        width: 150,
-        height: 150,
+        width: '100%',
+        height: '100%',
         borderRadius: 75,
         backgroundColor: '#ccc',
-        marginBottom: 20,
     },
 });
 
