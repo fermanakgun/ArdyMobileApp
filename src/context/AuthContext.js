@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await api.post("/auth/logout");
+            await api.post("/auth/logout",{}, { _isLoginRequest: true });
         } catch (error) {
             console.log("Logout sırasında sunucu hatası:", error);
         } finally {

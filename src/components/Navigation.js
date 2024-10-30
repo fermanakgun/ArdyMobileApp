@@ -17,6 +17,7 @@ import OtherScreen from '../screens/OtherScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import MessageDetailScreen from '../screens/MessageDetailScreen';
 import { AuthContext } from '../context/AuthContext';
+import ProfilePictureScreen from '../screens/ProfilePictureScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -71,6 +72,7 @@ const DrawerNavigator = ({ setIsRightDrawerOpen }) => (
             name="Main"
             component={MainTabNavigator}
             options={({ navigation }) => ({
+                title: "Anasayfa",
                 headerLeft: () => (
                     <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
                         <Icon name="menu" size={30} color="#333" style={{ marginLeft: 15 }} />
@@ -84,8 +86,9 @@ const DrawerNavigator = ({ setIsRightDrawerOpen }) => (
                 ),
             })}
         />
-        <Drawer.Screen name="OtherScreen" component={OtherScreen} />
-        <Drawer.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} />
+        <Drawer.Screen name="OtherScreen" component={OtherScreen} options={{ title: "Test Ekranı" }} />
+        <Drawer.Screen name="ProfilePictureScreen" component={ProfilePictureScreen} options={{ title: "Profil Fotoğrafı Değiştir" }} />
+        <Drawer.Screen name="ChangePasswordScreen" component={ChangePasswordScreen} options={{ title: "Parola Değiştir" }} />
     </Drawer.Navigator>
 );
 

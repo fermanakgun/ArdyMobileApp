@@ -43,15 +43,17 @@
         <true/>
     </dict>
 
-    <!-- Bildirim İzinleri ve Erişim -->
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Konumunuzu kullanmak için izninize ihtiyacımız var.</string>
+    <!-- Dosya Erişim ve Galeri İzinleri -->
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Fotoğraflarınızı seçmek için galerideki resimlerinize erişim izni gerekiyor.</string>
+    <string>Uygulama galeriye erişmek için izninizi istiyor. Bu, galerinizdeki fotoğrafları seçebilmemiz içindir.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Fotoğraflar kaydedebilmek için galerinizde değişiklik yapmamıza izin verin.</string>
     <key>NSCameraUsageDescription</key>
     <string>Fotoğraf çekmek için kameraya erişim izni gerekiyor.</string>
-    <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>Fotoğrafları kaydetmek için galeriye erişim izni gerekiyor.</string>
+
+    <!-- Konum İzni -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Konumunuzu kullanmak için izninize ihtiyacımız var.</string>
 
     <!-- Ekran ve Uygulama Ayarları -->
     <key>UILaunchStoryboardName</key>
