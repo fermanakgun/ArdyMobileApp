@@ -83,7 +83,38 @@ export const AuthProvider = ({ children }) => {
             showMessage(error.response?.data?.message || "Beklenmedik bir hata oluştu. Lütfen daha sonra tekrar deneyin.", "error");
         }
     };
-
+    const changeProfilePicture = async (newProfilePictureUri) => {
+        try {
+            setIsLoading(true);
+            const formData = new FormData();
+            formData.append("file", {
+                uri: newProfilePictureUri,
+                type: "image/jpeg",
+                name: "profile.jpg",
+            });
+    
+            const response = await api.post("customer/updateProfilePicture", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+    
+            if (response.status === 200) {
+                // Profil fotoğrafı başarıyla güncellendiyse, customerInfo'yu yeniden yüklüyoruz
+                const updatedCustomerInfo = await api.post("customer/getActiveCustomerInfo", {});
+                await AsyncStorage.setItem("customerInfo", JSON.stringify(updatedCustomerInfo.data.customer));
+                setCustomerInfo(updatedCustomerInfo.data.customer);
+                showMessage("Profil fotoğrafı başarıyla güncellendi.", "success");
+            } else {
+                showMessage("Profil fotoğrafı güncellenemedi.", "error");
+            }
+        } catch (error) {
+            showMessage("Profil fotoğrafı güncellenirken bir hata oluştu.", "error");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
     const logout = async () => {
         try {
             await api.post("/auth/logout",{}, { _isLoginRequest: true });
@@ -155,7 +186,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <PaperProvider>
-            <AuthContext.Provider value={{ isLoading, userInfo, customerInfo, splashLoading, register, login, logout, changePassword }}>
+            <AuthContext.Provider value={{ isLoading, userInfo, customerInfo, splashLoading, register, login, logout, changePassword,changeProfilePicture }}>
                 <View style={{ flex: 1 }}>
                     {children}
                     <Snackbar
