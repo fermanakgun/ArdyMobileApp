@@ -68,7 +68,6 @@ const HomeScreen = ({ navigation }) => {
       </Text>
       
       <Button title="Çıkış Yap" onPress={logout} />
-      <Button title="Fotoğraf Seç" onPress={selectImage} />
 
       {imageUri && (
         <>
