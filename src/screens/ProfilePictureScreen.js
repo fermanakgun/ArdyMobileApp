@@ -1,25 +1,29 @@
 import React, { useContext, useState } from 'react';
 import { View, Image, Button, ActivityIndicator, StyleSheet } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 import { AuthContext } from '../context/AuthContext';
 
 const ProfilePictureScreen = () => {
     const { customerInfo, changeProfilePicture, isLoading } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false); // Yükleme durumunu göstermek için
+    const [loading, setLoading] = useState(false);
 
     const selectProfilePicture = () => {
-        launchImageLibrary({ mediaType: 'photo' }, async (response) => {
-            if (response.assets && response.assets.length > 0) {
-                setLoading(true); // Yükleme durumunu başlatıyoruz
-                await changeProfilePicture(response.assets[0].uri); // Profil fotoğrafını güncelle
-                setLoading(false); // Yükleme durumunu durduruyoruz
-            }
+        ImagePicker.openPicker({
+            width: 300, // Kırpma işlemi için genişlik
+            height: 300, // Kırpma işlemi için yükseklik
+            cropping: true, // Kırpma özelliğini aktif et
+            mediaType: 'photo'
+        }).then(async (image) => {
+            setLoading(true);
+            await changeProfilePicture(image.path); // Profil fotoğrafını güncelle
+            setLoading(false);
+        }).catch((error) => {
+            console.error("Image selection error:", error);
         });
     };
 
     return (
         <View style={styles.container}>
-            {/* Profil fotoğrafı veya yükleme animasyonu */}
             <View style={styles.imageContainer}>
                 {(isLoading || loading) ? (
                     <ActivityIndicator size="large" color="#0000ff" />
@@ -30,12 +34,11 @@ const ProfilePictureScreen = () => {
                             style={styles.profileImage} 
                         />
                     ) : (
-                        <View style={styles.placeholderImage} /> // Varsayılan görünüm
+                        <View style={styles.placeholderImage} />
                     )
                 )}
             </View>
 
-            {/* Fotoğraf değiştirme butonu */}
             <Button title="Profil Fotoğrafını Değiştir" onPress={selectProfilePicture} />
         </View>
     );
