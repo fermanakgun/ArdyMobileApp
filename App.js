@@ -6,7 +6,7 @@ import PushNotification from 'react-native-push-notification';
 import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import SplashScreen from 'react-native-splash-screen';
 const theme = {
   ...DefaultTheme,
   colors: {
@@ -19,6 +19,7 @@ const App = () => {
   useEffect(() => {
     //configurePushNotifications();
     //sendWelcomeNotification();
+    //SplashScreen.hide();
   }, []);
 
   const configurePushNotifications = () => {

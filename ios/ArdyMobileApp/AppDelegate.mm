@@ -2,6 +2,7 @@
 #import <React/RCTBundleURLProvider.h>
 #import <RNCPushNotificationIOS.h> // RNCPushNotificationIOS'u içe aktarıyoruz
 #import <UserNotifications/UserNotifications.h> // UserNotifications Framework
+#import "RNSplashScreen.h"
 
 @interface AppDelegate () <UNUserNotificationCenterDelegate> // UNUserNotificationCenterDelegate protokolü eklendi
 @end
@@ -10,20 +11,23 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  self.moduleName = @"ArdyMobileApp";
-  self.initialProps = @{};
+  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+                                                   moduleName:@"ArdyMobileApp"
+                                            initialProperties:nil];
 
-  // Uygulamanın bildirimleri yönetmesi için UNUserNotificationCenterDelegate ayarlanır
-  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-  center.delegate = self;
+  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
 
-  // launchOptions'ın nil olup olmadığını kontrol ediyoruz
-  if (launchOptions) {
-    [RNCPushNotificationIOS didReceiveRemoteNotification:launchOptions];
-  }
+  self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UIViewController *rootViewController = [UIViewController new];
+  rootViewController.view = rootView;
+  self.window.rootViewController = rootViewController;
+  [self.window makeKeyAndVisible];
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  [RNSplashScreen show];  // SplashScreen'i göster ve manuel kapanmasını sağla
+  return YES;
 }
+
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {

@@ -4,7 +4,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { View } from "react-native";
 import { Snackbar, Provider as PaperProvider } from "react-native-paper";
 import api, { setLogout } from "../../api";
-
+import SplashScreen from "react-native-splash-screen";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -176,6 +176,7 @@ export const AuthProvider = ({ children }) => {
             showMessage("Kullanıcı durumu kontrol edilirken bir hata oluştu.", "error");
         } finally {
             setSplashLoading(false);
+            SplashScreen.hide();
         }
     };
 
