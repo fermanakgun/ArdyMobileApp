@@ -9,16 +9,21 @@ const ProfilePictureScreen = () => {
 
     const selectProfilePicture = () => {
         ImagePicker.openPicker({
-            width: 300, // Kırpma işlemi için genişlik
-            height: 300, // Kırpma işlemi için yükseklik
-            cropping: true, // Kırpma özelliğini aktif et
+            width: 300,
+            height: 300,
+            cropping: true,
             mediaType: 'photo'
-        }).then(async (image) => {
+        })
+        .then(async (image) => {
             setLoading(true);
-            await changeProfilePicture(image.path); // Profil fotoğrafını güncelle
+            await changeProfilePicture(image.path);
             setLoading(false);
-        }).catch((error) => {
-            console.error("Image selection error:", error);
+        })
+        .catch((error) => {
+            // Kullanıcı iptal ettiğinde hiçbir işlem yapılmaz
+            if (error.message !== 'User cancelled image selection') {
+                console.error("Image selection error:", error);
+            }
         });
     };
 
